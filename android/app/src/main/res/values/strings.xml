@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Formaliti</string>
+    <string name="title_activity_main">Formaliti</string>
+    <string name="package_name">pl.formaliti.app</string>
+    <string name="custom_url_scheme">pl.formaliti.app</string>
+</resources>
