@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Formaliti</title>
+  <meta name="description" content="Formaliti: asystent formalności życiowych. Twój osobisty przewodnik po formalnościach i urzędach.">
+  <meta name="theme-color" content="#1d4ed8">
+
+  <!-- PWA: instalacja na ekranie głównym (Android i iOS) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Formaliti">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- NAGŁÓWEK -->
+  <header class="topbar">
+    <div class="logo" aria-hidden="true">🏛️</div>
+    <div class="topbar-text">
+      <div class="topbar-title">
+        <span class="brand">Formaliti</span>
+        <span class="badge badge-blue">Polska Administracja</span>
+      </div>
+      <p class="topbar-sub">Twój osobisty przewodnik po formalnościach i urzędach</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- EKRAN 1: SYTUACJE -->
+    <section id="view-start" class="view active">
+
+      <div class="card">
+        <h2 class="section-label"><span>⚡</span> Wybierz popularną sytuację życiową</h2>
+        <div id="presets-container" class="presets"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <h2 class="section-label"><span>✨</span> Opisz własną sytuację</h2>
+          <span class="badge badge-grey">Model AI Agent</span>
+        </div>
+        <p class="hint">
+          Napisz np. <em>"Kupiłem mieszkanie na rynku wtórnym i chcę przepisać liczniki"</em>
+          albo <em>"Urodziło mi się dziecko i planuję urlop macierzyński"</em>.
+        </p>
+
+        <form id="ai-form">
+          <textarea id="user-prompt" rows="4" placeholder="Opisz dokładnie swoją sytuację życiową..." required></textarea>
+
+          <div class="row-between small">
+            <span class="strong">Opcje doprecyzowujące:</span>
+            <button type="button" id="extra-btn" class="link-btn">Pokaż szczegóły +</button>
+          </div>
+
+          <div id="extra-filters" class="extra hidden">
+            <label for="param-age">Status wiekowy / edukacyjny:</label>
+            <select id="param-age">
+              <option value="standard">Standardowy (powyżej 26 lat)</option>
+              <option value="under26_student">Student / uczeń poniżej 26 lat (Ulga dla młodych)</option>
+              <option value="senior">Senior / emeryt</option>
+            </select>
+            <label for="param-auth">Dostęp do e-administracji:</label>
+            <select id="param-auth">
+              <option value="has_pz">Posiadam Profil Zaufany / aplikację mObywatel</option>
+              <option value="no_pz">Brak Profilu Zaufanego (wymaga wizyty w urzędzie/banku)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="generate-btn" class="btn btn-primary">
+            <span id="btn-icon">⚡</span>
+            <span id="btn-text">Wygeneruj indywidualny plan formalności</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="disclaimer">
+        <span aria-hidden="true">💡</span>
+        <p>
+          Aplikacja dostarcza zweryfikowane ścieżki procedur w oparciu o oficjalne wytyczne serwisów
+          <strong>Gov.pl, Biznes.gov.pl, ZUS oraz podatki.gov.pl</strong>. Stanowi ułatwienie
+          administracyjne i nie zastępuje indywidualnej porady prawnej.
+        </p>
+      </div>
+    </section>
+
+    <!-- EKRAN 2: MÓJ PLAN -->
+    <section id="view-plan" class="view">
+
+      <div class="card">
+        <div class="plan-head">
+          <span id="active-icon" class="plan-icon">💼</span>
+          <div class="plan-head-text">
+            <h1 id="active-title"></h1>
+            <p id="active-desc" class="hint"></p>
+          </div>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress"><div id="progress-bar-fill"></div></div>
+          <div class="progress-num">
+            <span id="progress-percent">0%</span>
+            <small>ukończonych kroków</small>
+          </div>
+        </div>
+
+        <div class="chips" id="status-filters">
+          <button class="chip active" data-filter="all">Wszystkie (<span id="count-all">0</span>)</button>
+          <button class="chip" data-filter="pending">Do zrobienia (<span id="count-pending">0</span>)</button>
+          <button class="chip" data-filter="done">Zrobione (<span id="count-done">0</span>)</button>
+        </div>
+
+        <div class="category-row">
+          <label for="category-filter">Kategoria:</label>
+          <select id="category-filter">
+            <option value="all">Wszystkie kategorie</option>
+            <option value="rejestracja">Rejestracja &amp; Urząd</option>
+            <option value="zus">ZUS &amp; Ubezpieczenia</option>
+            <option value="podatki">Podatki &amp; Finanse</option>
+            <option value="legal">Tożsamość &amp; Prawo</option>
+            <option value="inne">Inne</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button id="share-btn" class="btn btn-primary btn-small">📤 Udostępnij plan</button>
+          <button id="copy-btn" class="btn btn-ghost btn-small">📋 Kopiuj tekst</button>
+        </div>
+      </div>
+
+      <div id="items-container" class="items"></div>
+
+      <div id="empty-state" class="card empty hidden">
+        <div class="empty-icon">🎉</div>
+        <h3>Brak zadań w wybranym filtrze</h3>
+        <p class="hint">Wszystkie kroki w tej sekcji zostały ukończone lub nie odpowiadają aktualnym kryteriom wyszukiwania.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DOLNA NAWIGACJA -->
+  <nav class="tabbar">
+    <button class="tab active" data-view="start">
+      <span class="tab-icon">🧭</span>
+      <span>Sytuacje</span>
+    </button>
+    <button class="tab" data-view="plan">
+      <span class="tab-icon">✅<i id="tab-badge" class="tab-badge hidden">0</i></span>
+      <span>Mój plan</span>
+    </button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toast-icon">✅</span>
+    <span id="toast-message"></span>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
